@@ -16,7 +16,6 @@ docker run -d -e RABBITMQ_NODENAME=rabbitmq -h rabbitmq --name rabbitmq rabbitmq
 # Running the keystone
 cd keystone
 make build
-make build
 docker run -d  --link mysql:mysql --name keystone -h keystone haishi/openstack-keystone:latest
 
 # Running the glance
@@ -38,7 +37,7 @@ make build
 docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance --link controller:controller -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_TENANT_NAME=admin --privileged --name node1 -h node1 haishi/openstack-nova-compute:latest
 ```
 
-## Using remote docker images
+## Using remote docker images(Waiting for a moment, Uploading...)
 ```shell
 # Running the base components
 docker run -d -e MYSQL_ROOT_PASSWORD=MYSQL_DBPASS -h mysql --name mysql -d mariadb:latest
