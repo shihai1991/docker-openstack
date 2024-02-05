@@ -1,6 +1,6 @@
 # docker-openstack
 Deploying the Openstack of Mitaka in docker. This repo is based on the [int32bit/docker-nova-compute](https://github.com/int32bit/docker-nova-compute). I create this repo's reason is that the `int32bit/docker-nova-compute` is too old and I met some problems when using it. And I follow [the official guide](https://docs.openstack.org/mitaka/install-guide-rdo/nova.html) to depoly the Openstack in docker.
-
+I use this project to shift our left test. If you want to depoly Openstack in production environment, you should use [Kolla](https://github.com/openstack/kolla).
 # How to run
 We have two ways to run docker instances.
 - Using local docker images;
