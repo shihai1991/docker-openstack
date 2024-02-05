@@ -1,0 +1,10 @@
+alembic===0.8.4
+keystoneauth1===2.4.3
+keystonemiddleware===4.4.1
+os-client-config===1.16.0
+openstacksdk===0.8.1
+oslo.db===4.7.1
+python-cinderclient===1.6.0
+python-glanceclient===2.0.1
+python-novaclient===3.3.2
+python-openstackclient===2.3.0
