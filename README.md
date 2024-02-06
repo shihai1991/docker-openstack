@@ -7,6 +7,27 @@ We have two ways to run docker instances.
 - Using local docker images;
 - Using remote docker images from docker.io;
 
+## Using remote docker images
+I have been uploading the docker image to [docker repo](https://hub.docker.com/repositories/shihai1991). So you can use the remote docker images directly.
+```shell
+# Running the base components
+docker run -d -e MYSQL_ROOT_PASSWORD=MYSQL_DBPASS -h mysql --name mysql -d mariadb:latest
+docker run -d -e RABBITMQ_NODENAME=rabbitmq -h rabbitmq --name rabbitmq rabbitmq:latest
+
+# Running the keystone
+docker run -d  --link mysql:mysql --name keystone -h keystone shihai1991/openstack-keystone:latest
+
+# Running the glance
+docker run -d --link mysql:mysql  --link keystone:keystone  -e OS_USERNAME=admin  -e OS_PASSWORD=ADMIN_PASS  -e OS_AUTH_URL=http://keystone:5000/v3  -e OS_PROJECT_NAME=admin  --name glance  -h glance  shihai1991/openstack-glance:latest
+
+# Running the controller node
+docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_PROJECT_NAME=admin --privileged --name controller -h controller shihai1991/openstack-nova-controller:latest
+
+# Running the compute node
+docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance --link controller:controller -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_TENANT_NAME=admin --privileged --name node1 -h node1 shihai1991/openstack-nova-compute:latest
+```
+It should be noticed that I use the [`FakeDriver`](https://github.com/shihai1991/docker-openstack/blob/8afe254042ea7e16f6c800baa03d990e28d5fdb9/nova/nova-compute/nova.conf#L21) in compute node. If you want use other [hypervisors](https://github.com/openstack/nova/blob/681f6872fb3fbca290cfc3ff15d34b1d1ba6642d/doc/source/admin/configuration/hypervisors.rst), you can change it.
+
 ## Using local docker images
 ```
 # Running the base components
@@ -36,26 +57,6 @@ cd ../nova-compute
 make build
 docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance --link controller:controller -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_TENANT_NAME=admin --privileged --name node1 -h node1 haishi/openstack-nova-compute:latest
 ```
-
-## Using remote docker images(Waiting for a moment, Uploading...)
-```shell
-# Running the base components
-docker run -d -e MYSQL_ROOT_PASSWORD=MYSQL_DBPASS -h mysql --name mysql -d mariadb:latest
-docker run -d -e RABBITMQ_NODENAME=rabbitmq -h rabbitmq --name rabbitmq rabbitmq:latest
-
-# Running the keystone
-docker run -d  --link mysql:mysql --name keystone -h keystone haishi/openstack-keystone:latest
-
-# Running the glance
-docker run -d --link mysql:mysql  --link keystone:keystone  -e OS_USERNAME=admin  -e OS_PASSWORD=ADMIN_PASS  -e OS_AUTH_URL=http://keystone:5000/v3  -e OS_PROJECT_NAME=admin  --name glance  -h glance  haishi/openstack-glance:latest
-
-# Running the controller node
-docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_PROJECT_NAME=admin --privileged --name controller -h controller haishi/openstack-nova-controller:latest
-
-# Running the compute node
-docker run -d --link mysql:mysql --link keystone:keystone --link rabbitmq:rabbitmq --link glance:glance --link controller:controller -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket -e OS_USERNAME=admin -e OS_PASSWORD=ADMIN_PASS -e OS_AUTH_URL=http://keystone:5000/v3 -e OS_TENANT_NAME=admin --privileged --name node1 -h node1 haishi/openstack-nova-compute:latest
-```
-It should be noticed that I use the [`FakeDriver`](https://github.com/shihai1991/docker-openstack/blob/8afe254042ea7e16f6c800baa03d990e28d5fdb9/nova/nova-compute/nova.conf#L21) in compute node. If you want use other [hypervisors](https://github.com/openstack/nova/blob/681f6872fb3fbca290cfc3ff15d34b1d1ba6642d/doc/source/admin/configuration/hypervisors.rst), you can change it.
 
 ## Verify operation
 Login in the controller node, and to verify the lanuch operation by list service components.
